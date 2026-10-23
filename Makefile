@@ -1,0 +1,60 @@
+#
+# Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+# Author: Mark Rollins
+
+ECHO                               = @echo
+export TARGET                      ?= hw
+
+RELEASE=2025.2
+
+TOP_DIR                   ?= $(shell readlink -f .)
+PLATFORM_NAME              = xilinx_vck190_base_202520_1
+PLATFORM_PATH              = ${PLATFORM_REPO_PATHS}
+
+export PLATFORM            = ${PLATFORM_PATH}/${PLATFORM_NAME}/${PLATFORM_NAME}.xpfm
+export SYSROOT             = ${COMMON_IMAGE_VERSAL}/sysroots/cortexa72-cortexa53-amd-linux
+export KERNEL_IMAGE        = ${COMMON_IMAGE_VERSAL}/Image
+export ROOTFS              = ${COMMON_IMAGE_VERSAL}/rootfs.ext4
+export PREBUILT_LINUX_PATH = ${COMMON_IMAGE_VERSAL}
+
+##############
+# Build Flow #
+##############
+.PHONY: clean help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all"
+	$(ECHO) "      Command to generate everything for this design"
+	$(ECHO) ""
+	$(ECHO) "  make clean"
+	$(ECHO) "      Command to remove all the generated files."
+
+all:	pfa700
+
+pfa700:
+	$(MAKE) all -C aie/pfa700
+	$(MAKE) all -C hls/pfa700_dma_src
+	$(MAKE) all -C hls/pfa700_permute_i
+	$(MAKE) all -C hls/pfa700_transpose1
+	$(MAKE) all -C hls/pfa700_transpose2
+	$(MAKE) all -C hls/pfa700_permute_o
+	$(MAKE) all -C hls/pfa700_dma_snk
+	$(MAKE) all -C ps_apps
+	$(MAKE) all -C vitis
+
+clean:
+	$(MAKE) clean -C aie/pfa700
+	$(MAKE) clean -C hls/pfa700_dma_src
+	$(MAKE) clean -C hls/pfa700_permute_i
+	$(MAKE) clean -C hls/pfa700_transpose1
+	$(MAKE) clean -C hls/pfa700_transpose2
+	$(MAKE) clean -C hls/pfa700_permute_o
+	$(MAKE) clean -C hls/pfa700_dma_snk
+	$(MAKE) clean -C ps_apps
+	$(MAKE) clean -C vitis
+	@/bin/rm -rf .crashReporter*
+
+
